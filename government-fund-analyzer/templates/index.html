@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Government Fund Analyzer | Fiscal & Budget Intelligence Dashboard</title>
+    <meta name="description" content="AI-style government expenditure and financial analytics dashboard. Analyze allocations, budget variances, capital vs revenue trends, and departmental fund distribution.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Background Ambient Ethereal Glow Elements -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- Main App Container -->
+    <div class="app-layout">
+        
+        <!-- ============================================== -->
+        <!-- TOP NAVIGATION BAR                             -->
+        <!-- ============================================== -->
+        <header class="top-nav">
+            <div class="nav-left">
+                <button id="sidebar-toggle" class="icon-btn sidebar-toggle-btn" aria-label="Toggle navigation menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="brand">
+                    <div class="brand-logo">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="brand-info">
+                        <span class="brand-name">GovFinance<span class="brand-accent">360</span></span>
+                        <span class="brand-badge">GOVERNMENT FUND ANALYZER</span>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="nav-center">
+                <a href="#hero-section" class="nav-link active"><i class="bi bi-speedometer2"></i> Overview</a>
+                <a href="#distribution-section" class="nav-link"><i class="bi bi-pie-chart"></i> Distribution</a>
+                <a href="#budget-section" class="nav-link"><i class="bi bi-bar-chart-steps"></i> Budget</a>
+                <a href="#rev-cap-section" class="nav-link" id="nav-rev-cap"><i class="bi bi-arrow-left-right"></i> Rev vs Cap</a>
+                <a href="#departments-section" class="nav-link"><i class="bi bi-building"></i> Departments</a>
+                <a href="#records-section" class="nav-link"><i class="bi bi-table"></i> Records</a>
+                <a href="#quality-section" class="nav-link"><i class="bi bi-shield-shaded"></i> Quality</a>
+            </nav>
+
+            <div class="nav-right">
+                <button id="theme-toggle-btn" class="icon-btn" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">
+                    <i class="bi bi-moon-stars" id="theme-icon"></i>
+                </button>
+                <button id="load-sample-btn" class="btn btn-outline" title="Load Authentic Government Budget Sample Dataset">
+                    <i class="bi bi-database-check"></i> <span class="hide-mobile">Load Sample</span>
+                </button>
+                <button id="open-upload-btn" class="btn btn-primary">
+                    <i class="bi bi-cloud-arrow-up-fill"></i> <span>Upload CSV</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ============================================== -->
+        <!-- HERO SHOWCASE SECTION                          -->
+        <!-- ============================================== -->
+        <section id="hero-section" class="hero-section">
+            <div class="hero-left">
+                <div class="hero-tag">
+                    <i class="bi bi-stars"></i> Next-Gen Public Financial Analytics
+                </div>
+                <h1 class="hero-title">
+                    Unlock Smarter Decisions with <span class="gradient-text">Next-Gen Fund Analytics</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Automated fiscal intelligence platform engineered to parse, reconcile, and visualize government financial outlays, budget variances, and ministry allocations in real time.
+                </p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary btn-lg" id="hero-upload-trigger">
+                        <i class="bi bi-upload"></i> Upload Government CSV
+                    </button>
+                    <button class="btn btn-glass btn-lg" id="hero-sample-trigger">
+                        <i class="bi bi-lightning-charge-fill"></i> Explore Demo Dataset
+                    </button>
+                </div>
+                <div class="dataset-meta-strip" id="dataset-meta-strip">
+                    <div class="meta-item">
+                        <span class="meta-label">Active Dataset:</span>
+                        <span class="meta-value" id="meta-filename">government_expenditure_budget.csv (Sample)</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Updated:</span>
+                        <span class="meta-value" id="meta-updated">Just now</span>
+                    </div>
+                    <button id="refresh-analysis-btn" class="refresh-pill-btn" title="Re-run analysis">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hero Right Showcase (Matching the uploaded inspiration layout) -->
+            <div class="hero-right">
+                <div class="showcase-card glass-panel">
+                    <div class="showcase-header">
+                        <div class="showcase-stat-pill">
+                            <i class="bi bi-folder-check"></i>
+                            <div>
+                                <span class="stat-sub">Tracked Heads</span>
+                                <strong id="hero-stat-records">30 Heads</strong>
+                            </div>
+                        </div>
+                        <div class="showcase-stat-pill">
+                            <i class="bi bi-shield-fill-check"></i>
+                            <div>
+                                <span class="stat-sub">Total Outlay</span>
+                                <strong id="hero-stat-total">29.95Cr</strong>
+                            </div>
+                        </div>
+                        <div class="showcase-stat-pill">
+                            <i class="bi bi-speedometer"></i>
+                            <div>
+                                <span class="stat-sub">Utilization</span>
+                                <strong id="hero-stat-util">94.95%</strong>
+                            </div>
+                        </div>
+                        <div class="time-filter-pill">
+                            <span>Fiscal Cycles <i class="bi bi-chevron-down"></i></span>
+                        </div>
+                    </div>
+
+                    <!-- Glowing Trend Area Sparkline -->
+                    <div class="showcase-chart-container">
+                        <div class="chart-annotation-badge" id="hero-chart-badge">
+                            <i class="bi bi-graph-up-arrow"></i> <span>Expenditure Trajectory</span>
+                        </div>
+                        <canvas id="heroTrendChart"></canvas>
+                    </div>
+
+                    <!-- Floating Radiant Orange Metric Card (Matching the user's inspiration layout) -->
+                    <div class="floating-accent-card">
+                        <div class="accent-card-top">
+                            <span class="accent-card-label" id="hero-accent-label">Top Allocation</span>
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </div>
+                        <div class="accent-card-metric">
+                            <span class="accent-amount" id="hero-top-amount">6.81Cr</span>
+                            <span class="accent-badge" id="hero-top-share">22.7%</span>
+                        </div>
+                        <div class="accent-dept-name" id="hero-top-dept">Ministry of Defence</div>
+                        <!-- Micro spark bars -->
+                        <div class="mini-bar-sparkline">
+                            <span class="bar" style="height: 45%;"></span>
+                            <span class="bar" style="height: 60%;"></span>
+                            <span class="bar" style="height: 50%;"></span>
+                            <span class="bar" style="height: 75%;"></span>
+                            <span class="bar" style="height: 65%;"></span>
+                            <span class="bar" style="height: 85%;"></span>
+                            <span class="bar active" style="height: 100%;"></span>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Right Tip Pill -->
+                    <div class="floating-tip-pill" id="hero-tip-pill">
+                        <i class="bi bi-lightbulb-fill"></i>
+                        <span id="hero-tip-text">AI Tip: Top 3 ministries absorb 42.2% of total capital & revenue outlays.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- FILTER CONTROL PANEL                           -->
+        <!-- ============================================== -->
+        <section class="filter-panel glass-panel">
+            <div class="filter-header">
+                <div class="filter-title">
+                    <i class="bi bi-sliders"></i>
+                    <span>Dynamic Filter Matrix</span>
+                </div>
+                <div class="filter-actions">
+                    <button id="clear-filters-btn" class="btn btn-sm btn-ghost">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </button>
+                    <button id="apply-filters-btn" class="btn btn-sm btn-primary">
+                        <i class="bi bi-check2"></i> Apply Filters
+                    </button>
+                </div>
+            </div>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="metric-select"><i class="bi bi-coin"></i> Financial Metric</label>
+                    <select id="metric-select" class="form-select">
+                        <option value="">Loading metrics...</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="department-select"><i class="bi bi-building"></i> Department / Ministry</label>
+                    <select id="department-select" class="form-select">
+                        <option value="ALL">All Departments</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="search-input"><i class="bi bi-search"></i> Search Keyword</label>
+                    <input type="text" id="search-input" class="form-input" placeholder="Search by name, scheme or code...">
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTION 5: KPI CARDS                           -->
+        <!-- ============================================== -->
+        <section class="kpi-grid" id="kpi-grid">
+            <!-- 1. Total Records -->
+            <div class="kpi-card glass-panel" title="Total expenditure heads and line items analyzed">
+                <div class="kpi-icon-wrap icon-cyan">
+                    <i class="bi bi-layers-fill"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Total Records</span>
+                    <h3 class="kpi-value" id="kpi-records">-</h3>
+                    <span class="kpi-subtext" id="kpi-records-sub">Active Line Items</span>
+                </div>
+            </div>
+
+            <!-- 2. Total Departments -->
+            <div class="kpi-card glass-panel" title="Unique departments, ministries or programs tracked">
+                <div class="kpi-icon-wrap icon-blue">
+                    <i class="bi bi-bank2"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Departments / Ministries</span>
+                    <h3 class="kpi-value" id="kpi-departments">-</h3>
+                    <span class="kpi-subtext">Autonomous Authorities</span>
+                </div>
+            </div>
+
+            <!-- 3. Total Primary Outlay -->
+            <div class="kpi-card glass-panel highlight-coral" title="Cumulative allocation of selected primary metric">
+                <div class="kpi-icon-wrap icon-coral">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label" id="kpi-primary-label">Total Allocation</span>
+                    <h3 class="kpi-value text-coral" id="kpi-total-amount">-</h3>
+                    <span class="kpi-subtext" id="kpi-total-exact" title="Full Amount">-</span>
+                </div>
+            </div>
+
+            <!-- 4. Total Budget -->
+            <div class="kpi-card glass-panel" id="card-total-budget" title="Total Budget Estimate (BE)">
+                <div class="kpi-icon-wrap icon-amber">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Total Budget (BE)</span>
+                    <h3 class="kpi-value" id="kpi-budget">-</h3>
+                    <span class="kpi-subtext" id="kpi-budget-exact">-</span>
+                </div>
+            </div>
+
+            <!-- 5. Total Actual Expenditure -->
+            <div class="kpi-card glass-panel" id="card-total-actual" title="Total Actual Disbursements">
+                <div class="kpi-icon-wrap icon-emerald">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Actual Expenditure</span>
+                    <h3 class="kpi-value" id="kpi-actual">-</h3>
+                    <span class="kpi-subtext" id="kpi-actual-exact">-</span>
+                </div>
+            </div>
+
+            <!-- 6. Average Expenditure -->
+            <div class="kpi-card glass-panel" title="Mean allocation per administrative unit">
+                <div class="kpi-icon-wrap icon-purple">
+                    <i class="bi bi-calculator"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Average Outlay</span>
+                    <h3 class="kpi-value" id="kpi-average">-</h3>
+                    <span class="kpi-subtext" id="kpi-average-exact">Per Department</span>
+                </div>
+            </div>
+
+            <!-- 7. Maximum Outlay -->
+            <div class="kpi-card glass-panel" title="Highest single allocation in dataset">
+                <div class="kpi-icon-wrap icon-rose">
+                    <i class="bi bi-arrow-up-right-circle"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Peak Allocation</span>
+                    <h3 class="kpi-value" id="kpi-max">-</h3>
+                    <span class="kpi-subtext" id="kpi-max-exact">Single Highest Head</span>
+                </div>
+            </div>
+
+            <!-- 8. Budget Variance -->
+            <div class="kpi-card glass-panel" id="card-variance" title="Budget Estimate minus Actual Expenditure">
+                <div class="kpi-icon-wrap icon-teal">
+                    <i class="bi bi-graph-down-arrow"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Budget Variance</span>
+                    <h3 class="kpi-value" id="kpi-variance">-</h3>
+                    <span class="kpi-subtext" id="kpi-variance-status">Variance Status</span>
+                </div>
+            </div>
+
+            <!-- 9. Utilization % -->
+            <div class="kpi-card glass-panel" id="card-utilization" title="Expenditure / Budget Estimate * 100">
+                <div class="kpi-icon-wrap icon-green">
+                    <i class="bi bi-pie-chart-fill"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Budget Utilization</span>
+                    <h3 class="kpi-value" id="kpi-utilization">-</h3>
+                    <span class="kpi-subtext" id="kpi-utilization-sub">Disbursement Rate</span>
+                </div>
+            </div>
+
+            <!-- 10. Revenue Expenditure -->
+            <div class="kpi-card glass-panel" id="card-revenue" title="Operational & recurring expenditure">
+                <div class="kpi-icon-wrap icon-orange">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Revenue Expenditure</span>
+                    <h3 class="kpi-value" id="kpi-revenue">-</h3>
+                    <span class="kpi-subtext" id="kpi-revenue-pct">Operational Outlay</span>
+                </div>
+            </div>
+
+            <!-- 11. Capital Expenditure -->
+            <div class="kpi-card glass-panel" id="card-capital" title="Capital assets, infrastructure & development">
+                <div class="kpi-icon-wrap icon-indigo">
+                    <i class="bi bi-building-up"></i>
+                </div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Capital Outlay</span>
+                    <h3 class="kpi-value" id="kpi-capital">-</h3>
+                    <span class="kpi-subtext" id="kpi-capital-pct">Infrastructure Creation</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTION 15: AI FINANCIAL INSIGHTS              -->
+        <!-- ============================================== -->
+        <section class="section-block" id="insights-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title"><i class="bi bi-stars gradient-text"></i> Automated Fiscal Intelligence & Insights</h2>
+                    <p class="section-sub">Algorithmically generated fiscal assessments and concentration warnings derived from real dataset figures.</p>
+                </div>
+                <span class="pill-badge pill-coral"><i class="bi bi-cpu-fill"></i> Real-Data Powered</span>
+            </div>
+            <div class="insights-grid" id="insights-container">
+                <!-- Dynamically populated insight cards -->
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTION 6: FUND DISTRIBUTION                   -->
+        <!-- ============================================== -->
+        <section class="section-block" id="distribution-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title"><i class="bi bi-pie-chart-fill"></i> Fund Distribution</h2>
+                    <p class="section-sub">Departmental allocations, top recipients, and relative share of total public resources.</p>
+                </div>
+                <div class="section-controls">
+                    <span class="control-label">Metric:</span>
+                    <select id="distribution-metric-select" class="form-select select-compact">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid-2-col">
+                <!-- Horizontal Bar Chart: Top 10 Departments -->
+                <div class="chart-card glass-panel">
+                    <div class="chart-card-header">
+                        <div>
+                            <h3 class="chart-title">Top 10 Departments by Allocation</h3>
+                            <p class="chart-sub">Highest public fund recipients ranked by selected metric</p>
+                        </div>
+                        <button class="download-chart-btn" data-chart="top10DistChart" title="Download Chart PNG">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="top10DistChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Donut Chart: Percentage Share -->
+                <div class="chart-card glass-panel">
+                    <div class="chart-card-header">
+                        <div>
+                            <h3 class="chart-title">Portfolio Share Breakdown</h3>
+                            <p class="chart-sub">Proportional weight of top departments vs other authorities</p>
+                        </div>
+                        <button class="download-chart-btn" data-chart="donutShareChart" title="Download Chart PNG">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
+                    <div class="chart-wrapper donut-wrapper">
+                        <canvas id="donutShareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Department Allocation Share Mini-Table -->
+            <div class="table-card glass-panel mt-4">
+                <div class="table-card-header">
+                    <h3 class="chart-title"><i class="bi bi-table"></i> Top Department Allocation Summary</h3>
+                    <span class="badge-tag">Top 10 Allocation Share</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="distribution-summary-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Department / Ministry</th>
+                                <th>Allocation Amount</th>
+                                <th>Percentage Share</th>
+                                <th>Proportion Bar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="distribution-summary-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTION 7: BUDGET ANALYSIS                     -->
+        <!-- ============================================== -->
+        <section class="section-block" id="budget-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title"><i class="bi bi-bar-chart-steps"></i> Budget Analysis</h2>
+                    <p class="section-sub">Cross-comparison between Budget Estimate (BE), Revised Estimate (RE), and Actual Expenditures.</p>
+                </div>
+                <div class="budget-badge-pill" id="budget-status-pill">
+                    <i class="bi bi-activity"></i> Fiscal Variance Monitored
+                </div>
+            </div>
+
+            <div class="chart-card glass-panel">
+                <div class="chart-card-header">
+                    <div>
+                        <h3 class="chart-title">Budget vs Actuals vs Revised (Top Departments)</h3>
+                        <p class="chart-sub">Assessing disbursement efficiency and budget revisions across administrative heads</p>
+                    </div>
+                    <button class="download-chart-btn" data-chart="budgetComparisonChart" title="Download Chart PNG">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-wrapper chart-lg">
+                    <canvas id="budgetComparisonChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Variance & Utilization Breakdown Table -->
+            <div class="table-card glass-panel mt-4">
+                <div class="table-card-header">
+                    <h3 class="chart-title"><i class="bi bi-journal-check"></i> Variance & Utilization Ledger</h3>
+                    <span class="badge-tag">Fiscal Performance Metric</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="budget-details-table">
+                        <thead>
+                            <tr>
+                                <th>Department / Ministry</th>
+                                <th>Budget Estimate (BE)</th>
+                                <th>Actual Expenditure</th>
+                                <th>Revised Estimate (RE)</th>
+                                <th>Budget Variance</th>
+                                <th>Utilization %</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="budget-details-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTION 8: REVENUE VS CAPITAL                  -->
+        <!-- ============================================== -->
+        <section class="section-block" id="rev-cap-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title"><i class="bi bi-arrow-left-right"></i> Revenue vs Capital Expenditure</h2>
+                    <p class="section-sub">Structural division between recurring operational expenses and long-term capital assets.</p>
+                </div>
+            </div>
+
+            <div class="grid-2-col">
+                <!-- Donut Ratio -->
+                <div class="chart-card glass-panel">
+                    <div class="chart-card-header">
+                        <div>
+                            <h3 class="chart-title">Overall Capital vs Revenue Split</h3>
+                            <p class="chart-sub">Aggregate portfolio composition</p>
+                        </div>
+                        <button class="download-chart-btn" data-chart="revCapDonutChart" title="Download Chart PNG">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
+                    <div class="chart-wrapper donut-wrapper">
+                        <canvas id="revCapDonutChart"></canvas>
+                    </div>
+                    <div class="rev-cap-stats">
+                        <div class="stat-pill">
+                            <span class="pill-dot dot-orange"></span>
+                            <span>Revenue: <strong id="rev-cap-stat-rev">-</strong> (<span id="rev-cap-stat-rev-pct">-</span>)</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="pill-dot dot-cyan"></span>
+                            <span>Capital: <strong id="rev-cap-stat-cap">-</strong> (<span id="rev-cap-stat-cap-pct">-</span>)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grouped Bar Chart per Department -->
+                <div class="chart-card glass-panel">
+                    <div class="chart-card-header">
+                        <div>
+                            <h3 class="chart-title">Departmental Revenue vs Capital Outlay</h3>
+                            <p class="chart-sub">Asset creation balance across major ministries</p>
+                        </div>
+                        <button class="download-chart-btn" data-chart="revCapBarChart" title="Download Chart PNG">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="revCapBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTION 9: FINANCIAL TREND ANALYSIS            -->
+        <!-- ============================================== -->
+        <section class="section-block" id="trend-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title"><i class="bi bi-graph-up"></i> Financial Trend & Temporal Analysis</h2>
+                    <p class="section-sub">Periodic evolution of public spending across detected financial years and cycles.</p>
+                </div>
+            </div>
+
+            <div class="chart-card glass-panel">
+                <div class="chart-card-header">
+                    <div>
+                        <h3 class="chart-title" id="trend-chart-title">Temporal Outlay Trajectory</h3>
+                        <p class="chart-sub">Chronological aggregation of tracked financial periods</p>
+                    </div>
+                    <button class="download-chart-btn" data-chart="financialTrendChart" title="Download Chart PNG">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-wrapper chart-lg">
+                    <canvas id="financialTrendChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTIONS 10 & 11: DEPARTMENTS RANKING          -->
+        <!-- ============================================== -->
+        <section class="section-block" id="departments-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title"><i class="bi bi-building"></i> Department Spending Hierarchy</h2>
+                    <p class="section-sub">Granular ranking of top spending agencies vs lowest funded administrative units.</p>
+                </div>
+            </div>
+
+            <div class="grid-2-col">
+                <!-- Top 10 Spending -->
+                <div class="chart-card glass-panel">
+                    <div class="chart-card-header">
+                        <div>
+                            <h3 class="chart-title text-emerald"><i class="bi bi-arrow-up-circle"></i> Top 10 Spending Departments</h3>
+                            <p class="chart-sub">Sorted from highest outlay to lowest</p>
+                        </div>
+                        <button class="download-chart-btn" data-chart="topSpendingChart" title="Download Chart PNG">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="topSpendingChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Lowest 10 Spending (Conditional) -->
+                <div class="chart-card glass-panel" id="lowest-spending-card">
+                    <div class="chart-card-header">
+                        <div>
+                            <h3 class="chart-title text-amber"><i class="bi bi-arrow-down-circle"></i> Lowest 10 Spending Departments</h3>
+                            <p class="chart-sub">Sorted from lowest outlay upwards</p>
+                        </div>
+                        <button class="download-chart-btn" data-chart="lowestSpendingChart" title="Download Chart PNG">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="lowestSpendingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTION 12: EXPENDITURE COMPARISON             -->
+        <!-- ============================================== -->
+        <section class="section-block" id="comparison-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title"><i class="bi bi-bar-chart"></i> Multi-Metric Expenditure Comparison</h2>
+                    <p class="section-sub">Side-by-side metric comparison across top agencies (Actuals, Estimates, Revisions, Totals).</p>
+                </div>
+            </div>
+
+            <div class="chart-card glass-panel">
+                <div class="chart-card-header">
+                    <div>
+                        <h3 class="chart-title">Comparative Metric Outlay</h3>
+                        <p class="chart-sub">Evaluation across concurrent financial parameters</p>
+                    </div>
+                    <button class="download-chart-btn" data-chart="comparisonChart" title="Download Chart PNG">
+                        <i class="bi bi-download"></i>
+                    </button>
+                </div>
+                <div class="chart-wrapper chart-lg">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTION 13: GOVERNMENT FINANCIAL RECORDS       -->
+        <!-- ============================================== -->
+        <section class="section-block" id="records-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title"><i class="bi bi-table"></i> Government Financial Records</h2>
+                    <p class="section-sub">Searchable, sortable, and exportable ledger of cleaned public records.</p>
+                </div>
+                <div class="table-actions">
+                    <a href="/download" id="download-csv-btn" class="btn btn-outline">
+                        <i class="bi bi-file-earmark-arrow-down-fill"></i> Download Processed CSV
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-card glass-panel">
+                <div class="table-toolbar">
+                    <div class="table-search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="table-search-input" placeholder="Search across all records...">
+                    </div>
+                    <div class="table-toolbar-right">
+                        <div class="page-size-picker">
+                            <span>Show:</span>
+                            <select id="table-page-size" class="form-select select-sm">
+                                <option value="10">10</option>
+                                <option value="25" selected>25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table sortable-table" id="main-data-table">
+                        <thead id="main-table-head">
+                            <!-- Populated dynamically with sortable column headers -->
+                        </thead>
+                        <tbody id="main-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-pagination">
+                    <span class="pagination-info" id="pagination-info">Showing 0 to 0 of 0 records</span>
+                    <div class="pagination-controls" id="pagination-controls">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- SECTION 16: DATA QUALITY REPORT                -->
+        <!-- ============================================== -->
+        <section class="section-block" id="quality-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title"><i class="bi bi-shield-check"></i> Data Quality & Integrity Audit</h2>
+                    <p class="section-sub">Automated verification of dataset hygiene, missing values, duplicate rows, and schema integrity.</p>
+                </div>
+                <div class="quality-badge" id="quality-overall-badge">
+                    <span id="quality-score-value">100%</span> Health Score
+                </div>
+            </div>
+
+            <div class="quality-grid">
+                <div class="quality-tile glass-panel">
+                    <span class="quality-tile-label">Total Rows</span>
+                    <strong class="quality-tile-val" id="dq-rows">-</strong>
+                </div>
+                <div class="quality-tile glass-panel">
+                    <span class="quality-tile-label">Total Columns</span>
+                    <strong class="quality-tile-val" id="dq-cols">-</strong>
+                </div>
+                <div class="quality-tile glass-panel">
+                    <span class="quality-tile-label">Missing Values</span>
+                    <strong class="quality-tile-val text-amber" id="dq-missing">-</strong>
+                    <span class="quality-tile-sub" id="dq-missing-pct">-</span>
+                </div>
+                <div class="quality-tile glass-panel">
+                    <span class="quality-tile-label">Duplicate Rows</span>
+                    <strong class="quality-tile-val text-emerald" id="dq-duplicates">-</strong>
+                </div>
+                <div class="quality-tile glass-panel">
+                    <span class="quality-tile-label">Numeric Columns</span>
+                    <strong class="quality-tile-val text-cyan" id="dq-numeric">-</strong>
+                </div>
+                <div class="quality-tile glass-panel">
+                    <span class="quality-tile-label">Categorical Columns</span>
+                    <strong class="quality-tile-val text-purple" id="dq-text">-</strong>
+                </div>
+                <div class="quality-tile glass-panel">
+                    <span class="quality-tile-label">Empty Columns</span>
+                    <strong class="quality-tile-val" id="dq-empty">-</strong>
+                </div>
+            </div>
+
+            <!-- Column by column completeness table -->
+            <div class="table-card glass-panel mt-4">
+                <div class="table-card-header">
+                    <h3 class="chart-title"><i class="bi bi-list-check"></i> Column Schema & Completeness Matrix</h3>
+                    <span class="badge-tag">Schema Verification</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="quality-columns-table">
+                        <thead>
+                            <tr>
+                                <th>Column Name</th>
+                                <th>Detected Type</th>
+                                <th>Missing Values</th>
+                                <th>Missing %</th>
+                                <th>Distinct Values</th>
+                                <th>Completeness</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quality-columns-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- FOOTER                                         -->
+        <!-- ============================================== -->
+        <footer class="dashboard-footer">
+            <div class="footer-left">
+                <div class="footer-logo">
+                    <i class="bi bi-shield-check"></i> GovFinance360
+                </div>
+                <p>Enterprise Government Financial Data Analytics & Budget Visualization Engine.</p>
+            </div>
+            <div class="footer-right">
+                <span>All calculations rendered in-browser & processed via Pandas.</span>
+                <span class="footer-copy">Version 1.0.0 &bull; Secure Local Processing</span>
+            </div>
+        </footer>
+
+    </div> <!-- End App Layout -->
+
+    <!-- ============================================== -->
+    <!-- CSV UPLOAD MODAL                               -->
+    <!-- ============================================== -->
+    <div id="upload-modal" class="modal-overlay" aria-hidden="true" role="dialog">
+        <div class="modal-card glass-panel">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <div class="modal-icon">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="modal-title">Upload Government Financial CSV</h3>
+                        <p class="modal-sub">Import any budget, expenditure, or public finance CSV for automated analysis</p>
+                    </div>
+                </div>
+                <button id="close-modal-btn" class="icon-btn" aria-label="Close dialog">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <!-- Drag & Drop Zone -->
+            <div id="drop-zone" class="drop-zone">
+                <input type="file" id="csv-file-input" accept=".csv" class="file-input-hidden">
+                <div class="drop-zone-content">
+                    <div class="drop-zone-icon">
+                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                    </div>
+                    <h4>Drag & Drop your CSV file here</h4>
+                    <p class="drop-sub">or <span class="browse-link">browse from your computer</span></p>
+                    <span class="file-spec">Accepts .CSV files up to 32MB</span>
+                </div>
+            </div>
+
+            <!-- Selected File Display -->
+            <div id="selected-file-card" class="selected-file-card d-none">
+                <div class="file-meta">
+                    <i class="bi bi-filetype-csv file-type-icon"></i>
+                    <div class="file-details">
+                        <strong id="selected-file-name">filename.csv</strong>
+                        <span id="selected-file-size">0 KB</span>
+                    </div>
+                </div>
+                <button id="remove-file-btn" class="icon-btn text-danger" title="Remove File">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
+
+            <!-- Upload Progress & Checklist -->
+            <div id="upload-progress-container" class="upload-progress-container d-none">
+                <div class="progress-bar-wrap">
+                    <div id="upload-progress-bar" class="progress-bar-fill"></div>
+                </div>
+                <div class="upload-checklist">
+                    <div class="check-item" id="chk-upload"><i class="bi bi-circle"></i> File uploaded successfully</div>
+                    <div class="check-item" id="chk-rows"><i class="bi bi-circle"></i> Rows detected & cleansed</div>
+                    <div class="check-item" id="chk-cols"><i class="bi bi-circle"></i> Financial columns detected</div>
+                    <div class="check-item" id="chk-analysis"><i class="bi bi-circle"></i> Analytics & charts completed</div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="load-sample-from-modal" class="btn btn-outline">
+                    <i class="bi bi-database-check"></i> Or Try Sample Dataset
+                </button>
+                <div class="modal-cta-group">
+                    <button id="cancel-upload-btn" class="btn btn-ghost">Cancel</button>
+                    <button id="start-upload-btn" class="btn btn-primary" disabled>
+                        <i class="bi bi-arrow-right-circle"></i> Analyze Dataset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Script -->
+    <script src="/static/script.js"></script>
+</body>
+</html>
